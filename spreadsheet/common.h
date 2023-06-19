@@ -34,27 +34,39 @@ struct Size {
 };
 
 // Описывает ошибки, которые могут возникнуть при вычислении формулы.
-class FormulaError {
+class FormulaError
+{
 public:
-    enum class Category {
+    enum class Category
+    {
         Ref,    // ссылка на ячейку с некорректной позицией
         Value,  // ячейка не может быть трактована как число
         Div0,  // в результате вычисления возникло деление на ноль
     };
-
-    FormulaError(Category category);
-
-    Category GetCategory() const;
-
-    bool operator==(FormulaError rhs) const;
-
-    std::string_view ToString() const;
-
 private:
-    Category category_;
+    Category m_Category;
+
+public:
+    FormulaError(Category Category)
+    : m_Category(Category){}
+
+    Category GetCategory() const
+    {
+        return m_Category;
+    }
+
+    bool operator==(FormulaError rhs) const
+    {
+        return m_Category == rhs.m_Category;
+    }
+
+    std::string_view ToString() const
+    {
+        return "";
+    }
 };
 
-std::ostream& operator<<(std::ostream& output, FormulaError fe);
+std::ostream & operator<<(std::ostream & output, FormulaError fe);
 
 // Исключение, выбрасываемое при попытке передать в метод некорректную позицию
 class InvalidPositionException : public std::out_of_range {

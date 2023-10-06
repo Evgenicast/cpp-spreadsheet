@@ -2,30 +2,33 @@
 
 #include "common.h"
 
-#include "FormulaAST.h"
-
 #include <memory>
-#include <variant>
-#include <sstream>
+#include <deque>
 
-// Формула, позволяющая вычислять и обновлять арифметическое выражение.
-// Поддерживаемые возможности:
-// * Простые бинарные операции и числа, скобки: 1+2*3, 2.5*(2+3.5/7)
-class FormulaInterface {
+class FormulaInterface
+{
 public:
     using Value = std::variant<double, FormulaError>;
 
     virtual ~FormulaInterface() = default;
 
-    // Возвращает вычисленное значение формулы либо ошибку. На данном этапе
-    // мы создали только 1 вид ошибки -- деление на 0.
-    virtual Value Evaluate() const = 0;
+    // Возвращает вычисленное значение формулы для переданного листа либо ошибку.
+    // Если вычисление какой-то из указанных в формуле ячеек приводит к ошибке, то
+    // возвращается именно эта ошибка. Если таких ошибок несколько, возвращается
+    // любая.
+    virtual Value Evaluate(const SheetInterface& sheet) const = 0;
 
     // Возвращает выражение, которое описывает формулу.
     // Не содержит пробелов и лишних скобок.
     virtual std::string GetExpression() const = 0;
+	
+	/*******новые методы******/
+    // Возвращает список ячеек, которые используются при вычислении формулы.
+    // Дано в подсказке к дизайн Ревью.
+    virtual std::deque<Position> GetReferencedCells() const = 0;
 };
 
-// Парсит переданное выражение и возвращает объект формулы.
-// Бросает FormulaException в случае если формула синтаксически некорректна.
+// Парсит выражение и возвращает объект формулы.
+// Бросает FormulaException, если формула синтаксически некорректна.
+// Дается по умолчанию.
 std::unique_ptr<FormulaInterface> ParseFormula(std::string expression);
